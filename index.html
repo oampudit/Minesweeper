@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      table {
+        border-collapse: collapse;
+      }
+      td {
+        width: 50px;
+        height: 50px;
+        text-align: center;
+        vertical-align: middle;
+        border: 1px solid black;
+        font-size: 20px;
+      }
+      .hidden {
+        background-color: gray;
+      }
+      .revealed {
+        background-color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <table id="board"></table>
+    <button id="start">Start Game</button>
+    <script>
+      const BOARD_SIZE = 10;
+      const MINES = 10;
+      const board = document.getElementById('board');
+      const startBtn = document.getElementById('start');
+
+      // Initialize the board
+      function initBoard() {
+        // Reset the board
+        board.innerHTML = '';
+
+        // Create the table rows
+        for (let i = 0; i < BOARD_SIZE; i++) {
+          const row = document.createElement('tr');
+          board.appendChild(row);
+
+          // Create the cells in the row
+          for (let j = 0; j < BOARD_SIZE; j++) {
+            const cell = document.createElement('td');
+            cell.classList.add('hidden');
+            cell.setAttribute('data-row', i);
+            cell.setAttribute('data-col', j);
+            row.appendChild(cell);
+          }
+        }
+
+        // Get all cells and add mines to random cells
+        const cells = board.getElementsByTagName('td');
+        let minesPlaced = 0;
+        while (minesPlaced < MINES) {
+          const randomCell = cells[Math.floor(Math.random() * cells.length)];
+          if (!randomCell.classList.contains('mine')) {
+            randomCell.classList.add('mine');
+            minesPlaced++;
+          }
+        }
+
+        // Add the number of mines for each cell
+        for (let i = 0; i < cells.length; i++) {
+          let mines = 0;
+          const row = parseInt(cells[i].getAttribute('data-row'));
+          const col = parseInt(cells[i].getAttribute('data-col'));
+          for (let x = -1; x <= 1; x++) {
+            for (let y = -1; y <= 1; y++) {
+              if (x === 0 && y === 0) {
+                continue;
+              }
+              const r = row + x;
+              const c = col + y;
+              if (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
+                const adjacentCell = board.rows[r].cells[c];
+                if (adjacentCell.classList.contains('mine')) {
+                  mines++;
+                }
+              }
+            }
+          }
+          cells[i].setAttribute('data-mines', mines);
+        }
+
+        // Add event listener to each cell
+        for (let i = 0; i < cells.length; i++) {
+          cells[i].addEventListener('click', function () {
+            if (this.classList.contains('mine')) {
+              // Show all mines and reset the game
+              for (let j = 0; j < cells.length; j++) {
+                if (cells[j].classList.contains('mine')) {
+                  cells[j].classList.remove('hidden');
+                }
+              }
+              alert('You lost! Start a new game.');
+              initBoard();
+            } else {
+              this.classList.remove('hidden');
+              this.classList.add('revealed');
+              const mines = parseInt(this.getAttribute('data-mines'));
+              if (mines > 0) {
+                this.textContent = mines;
+              } else {
+                // Show all empty cells that are adjacent
+                for (let x = -1; x <= 1; x++) {
+                  for (let y = -1; y <= 1; y++) {
+                    if (x === 0 && y === 0) {
+                      continue;
+                    }
+                    const r = parseInt(this.getAttribute('data-row')) + x;
+                    const c = parseInt(this.getAttribute('data-col')) + y;
+                    if (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
+                      const adjacentCell = board.rows[r].cells[c];
+                      if (adjacentCell.classList.contains('hidden')) {
+                        adjacentCell.click();
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+      }
+
+      // Start the game when the button is clicked
+      startBtn.addEventListener('click', function () {
+        initBoard();
+      });
+    </script>
+  </body>
+</html>
