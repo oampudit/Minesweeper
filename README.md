@@ -1,3 +1,3 @@
 # Minesweeper
 
-[Edit on StackBlitz ⚡️](https://stackblitz.com/edit/js-frayxt)
+[Open Web Example](https://1148044.playcode.io/)
